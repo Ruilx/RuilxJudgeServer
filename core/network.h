@@ -31,6 +31,9 @@ class Network : public QWidget
 public:
 	explicit Network(int port, QWidget *parent = 0);
 	~Network();
+	bool isRunning(){
+		return this->server->isListening();
+	}
 
 signals:
 	void serverStarted();

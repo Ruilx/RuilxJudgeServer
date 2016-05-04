@@ -5,6 +5,7 @@
 #include <QtWidgets>
 #include "core/dockerdaemon.h"
 #include "core/network.h"
+#include "core/dockerrest.h"
 
 class MainW : public QMainWindow
 {
@@ -17,12 +18,19 @@ class MainW : public QMainWindow
 	QAction *stopServerAct;
 	QAction *startDockerDaemonAct;
 	QAction *stopDockerDaemonAct;
+	QAction *startDockerRestAct;
+	QAction *stopDockerRestAct;
+
 	QAction *exitAct;
 
 	QTabWidget *mainWidget;
 
 	DockerDaemon *dockerDaemon;
 	Network *network;
+	DockerRest *dockerRest;
+
+	void closeEvent(QCloseEvent *e);
+
 public:
 	MainW(QWidget *parent = 0);
 	~MainW();
@@ -45,6 +53,16 @@ private slots:
 	void serverCloseStateSlot(){
 		this->startServerAct->setEnabled(true);
 		this->stopServerAct->setEnabled(false);
+	}
+
+	void dockerRestStartStateSlot(){
+		this->startDockerRestAct->setEnabled(false);
+		this->stopDockerRestAct->setEnabled(true);
+	}
+
+	void dockerRestStopStateSlot(){
+		this->startDockerRestAct->setEnabled(true);
+		this->stopDockerRestAct->setEnabled(false);
 	}
 };
 

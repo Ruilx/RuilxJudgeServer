@@ -5,7 +5,9 @@ Network::Network(int port, QWidget *parent) : QWidget(parent){
 	this->outputEdit = new QTextEdit(this);
 	this->port = port;
 
+	this->outputEdit->setFont(QFont("RuilxFixedSys, courier new, Wenquanyi Zen Hei", 12));
 	this->outputEdit->setReadOnly(true);
+	this->outputEdit->setWordWrapMode(QTextOption::NoWrap);
 
 	QHBoxLayout *lay = new QHBoxLayout;
 	this->setLayout(lay);
@@ -31,21 +33,25 @@ void Network::send(quint64 tid, QJsonDocument doc){
 }
 
 void Network::startServer(){
-	if(!this->server->listen(QHostAddress::Any, this->port)){
-		this->outputEdit->insertPlainText(Log::getLogString(Log::Critical, "Network", QString("Cannot listen on port %1").arg(this->port)));
-		return;
+	if(!this->server->isListening()){
+		if(!this->server->listen(QHostAddress::Any, this->port)){
+			this->outputEdit->insertPlainText(Log::getLogString(Log::Critical, "Network", QString("Cannot listen on port %1").arg(this->port)));
+			return;
+		}
+		connect(this->server, SIGNAL(newConnection()), this, SLOT(newConnection()));
+		qDebug() << "[DEBUG][Network] Server started.";
+		this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Network", QString("Server started at host, port: %1").arg(this->port)));
+		emit this->serverStarted();
 	}
-	connect(this->server, SIGNAL(newConnection()), this, SLOT(newConnection()));
-	qDebug() << "[DEBUG][Network] Server started.";
-	this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Network", QString("Server started at host, port: %1").arg(this->port)));
-	emit this->serverStarted();
 }
 
 void Network::stopServer(){
-	qDebug() << "[DEBUG][Network]Server stopped.";
-	this->server->close();
-	this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Network", "Server closed."));
-	emit this->serverStoped();
+	if(this->server->isListening()){
+		qDebug() << "[DEBUG][Network]Server stopped.";
+		this->server->close();
+		this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Network", "Server closed."));
+		emit this->serverStoped();
+	}
 }
 
 void Network::newConnection(){
@@ -71,7 +77,7 @@ void Network::newConnection(){
 void Network::join(QThread *thread){
 	thread->quit();
 	thread->wait();
-	this->clientMap.take((int)thread->currentThreadId());
+	this->clientMap.take((quint64)thread->currentThreadId());
 	qDebug() << "[INFOR][HANDLE]" << thread << "deleted.";
 	delete thread;
 }

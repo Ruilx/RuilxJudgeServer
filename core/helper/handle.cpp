@@ -6,7 +6,7 @@ void Handle::start(){
 	connect(this->socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
 	connect(this->socket, SIGNAL(readyRead()), this, SLOT(read()));
 	qDebug() << "[DEBUG][HANDLE]" << QThread::currentThread() << "New connection";
-	emit this->information(QString("New connection: %1").arg((int)QThread::currentThreadId()));
+	emit this->information(QString("New connection: %1").arg((quint64)QThread::currentThreadId()));
 }
 
 void Handle::write(QJsonDocument doc){
@@ -39,7 +39,7 @@ void Handle::timerEvent(QTimerEvent *e){
 
 void Handle::disconnected(){
 	qDebug() << "[DEBUG][HANDLE]" << QThread::currentThread() << "Disconnected";
-	emit this->information(QString("Disconnect: %1").arg((int)QThread::currentThreadId()));
+	emit this->information(QString("Disconnect: %1").arg((quint64)QThread::currentThreadId()));
 	emit this->finished(QThread::currentThread());
 }
 

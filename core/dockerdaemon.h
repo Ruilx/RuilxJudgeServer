@@ -17,14 +17,20 @@ class DockerDaemon : public QWidget
 	int exitCode;
 	bool initiativeStopped;
 	QString dockerPath;
+	QStringList dockerArguments;
 
 	QTextEdit *outputEdit;
 	QProcess *dockerProcess;
 
 	bool killProcess();
 	void stopCurrentProgram();
+	void closeEvent(QCloseEvent *);
+
 public:
 	explicit DockerDaemon(QString dockerPath = QString(), QWidget *parent = 0);
+	bool isRunning(){
+		return (this->dockerProcess->state() != QProcess::NotRunning);
+	}
 
 signals:
 	void dockerNotFound();

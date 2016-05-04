@@ -25,13 +25,19 @@ DockerDaemon::DockerDaemon(QString dockerPath, QWidget *parent) : QWidget(parent
 	this->outputEdit = new QTextEdit(this);
 	this->dockerProcess = new QProcess(this);
 
+	this->outputEdit->setFont(QFont("RuilxFixedSys, courier new, Wenquanyi Zen Hei", 12));
+	this->outputEdit->setReadOnly(true);
+	this->outputEdit->setWordWrapMode(QTextOption::NoWrap);
+
 	if(dockerPath.isEmpty()){
-		this->dockerPath = "docker";
+		this->dockerPath = "/usr/bin/docker";
 	}else{
 		this->dockerPath = dockerPath;
 	}
+	this->dockerArguments.append("daemon");
 
 	this->dockerProcess->setProgram(this->dockerPath);
+	this->dockerProcess->setArguments(this->dockerArguments);
 
 #if QT_VERSION >= 0x050600 //if QT Version is 5.6.0 or later, QProcess::error signal called errorOccurred
 	this->connect(this->dockerProcess, &QProcess::errorOccurred, this, &DockerDaemon::errorOccurred);
@@ -45,8 +51,6 @@ DockerDaemon::DockerDaemon(QString dockerPath, QWidget *parent) : QWidget(parent
 	this->connect(this->dockerProcess, &QProcess::readyReadStandardOutput, this, &DockerDaemon::readStandardOutput);
 	this->connect(this->dockerProcess, &QProcess::stateChanged, this, &DockerDaemon::stateChanged);
 
-	this->outputEdit->setReadOnly(true);
-
 	QHBoxLayout *lay = new QHBoxLayout;
 	this->setLayout(lay);
 	lay->addWidget(this->outputEdit);
@@ -55,11 +59,17 @@ DockerDaemon::DockerDaemon(QString dockerPath, QWidget *parent) : QWidget(parent
 }
 
 void DockerDaemon::openDockerDaemon(){
-	this->dockerProcess->start();
+	this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Docker Daemon", QString("run docker: %1").arg(this->dockerPath)));
+	if(this->dockerProcess->state() == QProcess::NotRunning){
+		this->dockerProcess->start();
+	}
 }
 
 void DockerDaemon::closeDockerDaemon(){
-	this->stopCurrentProgram();
+	this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Docker Daemon", QString("stop docker daemon")));
+	if(this->dockerProcess->state() != QProcess::NotRunning){
+		this->stopCurrentProgram();
+	}
 }
 
 void DockerDaemon::errorOccurred(QProcess::ProcessError error){
@@ -148,17 +158,18 @@ void DockerDaemon::readStandardOutput(){
 	QList<QByteArray> list = str.split('\n');
 	foreach(auto p, list){
 		this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "StdOut", QString(p)));
+		//qDebug() << "Docker Daemon:" << p;
 	}
 }
 
 void DockerDaemon::readStandardError(){
 	qint64 size;
-	this->dockerProcess->setReadChannel(QProcess::StandardOutput);
+	this->dockerProcess->setReadChannel(QProcess::StandardError);
 	do{
 		size = this->dockerProcess->bytesAvailable();
 		QThread::currentThread()->msleep(5);
 	}while(size != this->dockerProcess->bytesAvailable());
-	QByteArray str = this->dockerProcess->readAllStandardOutput();
+	QByteArray str = this->dockerProcess->readAllStandardError();
 	if(str.isEmpty()){
 		// if reads none? no output
 		return;
@@ -188,5 +199,11 @@ void DockerDaemon::stopCurrentProgram(){
 	//qDebug() << "[DEBUG] [processTimer]: detected timerId:" << this->timerId;
 	this->initiativeStopped = true;
 	this->killProcess();
+}
+
+void DockerDaemon::closeEvent(QCloseEvent *){
+	if(this->dockerProcess->state() != QProcess::NotRunning){
+		this->stopCurrentProgram();
+	}
 }
 
