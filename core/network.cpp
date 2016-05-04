@@ -21,7 +21,7 @@ Network::~Network(){
 	}
 }
 
-void Network::send(int tid, QJsonDocument doc){
+void Network::send(quint64 tid, QJsonDocument doc){
 	Client *client = clientMap.value(tid, new Client);
 	if(client->clientThread != 0){
 		client->clientHandle->write(doc);
@@ -63,9 +63,9 @@ void Network::newConnection(){
 	handleThread->start();
 	client->clientHandle = handle;
 	client->clientThread = handleThread;
-	this->clientMap.insert((int)handleThread->currentThreadId(), client);
+	this->clientMap.insert((quint64)handleThread->currentThreadId(), client);
 
-	connect(handle, SIGNAL(received(int,QJsonDocument)), this, SLOT(receive(int,QJsonDocument)));
+	connect(handle, SIGNAL(received(quint64,QJsonDocument)), this, SLOT(receive(quin64,QJsonDocument)));
 }
 
 void Network::join(QThread *thread){

@@ -77,6 +77,7 @@ void DockerDaemon::errorOccurred(QProcess::ProcessError error){
 				this->outputEdit->insertPlainText(Log::getLogString(Log::Critical, "Docker Daemon", "Docker Daemon Failed to Start."));
 			}
 			this->outputEdit->insertPlainText(Log::getLogString(Log::Critical, "Docker Daemon", this->dockerProcess->errorString()));
+			emit this->dockerFinished();
 			break;
 		case QProcess::Crashed:
 			/* The process crashed some time after
@@ -175,10 +176,10 @@ void DockerDaemon::stateChanged(QProcess::ProcessState newState){
 			break;
 		case QProcess::Starting:
 			/* The process attempted to start */
-			emit this->dockerStarted();
 			break;
 		case QProcess::Running:
 			/* The process is running */
+			emit this->dockerStarted();
 			break;
 	}
 }

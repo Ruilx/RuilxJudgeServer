@@ -33,7 +33,7 @@ void Handle::timerEvent(QTimerEvent *e){
 			return;
 		}
 		qDebug() << "[DEBUG][HANDLE]" << QThread::currentThread() << "JSON received:" << doc;
-		emit this->received((int)QThread::currentThreadId(), doc);
+		emit this->received((quint64)QThread::currentThreadId(), doc);
 	}
 }
 

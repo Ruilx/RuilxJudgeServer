@@ -27,7 +27,7 @@ class Network : public QWidget
 	QTcpServer *server;
 	QTextEdit *outputEdit;
 
-	QMap<int, Client*> clientMap;
+	QMap<quint64, Client*> clientMap;
 public:
 	explicit Network(int port, QWidget *parent = 0);
 	~Network();
@@ -35,16 +35,16 @@ public:
 signals:
 	void serverStarted();
 	void serverStoped();
-	void received(int, QJsonDocument);
+	void received(quint64, QJsonDocument);
 public slots:
-	void send(int tid, QJsonDocument doc);
+	void send(quint64 tid, QJsonDocument doc);
 	void startServer();
 	void stopServer();
 
 private slots:
 	void newConnection();
 	void join(QThread *thread);
-	void receive(int tid, QJsonDocument doc){
+	void receive(quint64 tid, QJsonDocument doc){
 		qDebug() << "[DEBUG][Network] receive id:" << tid << "doc:" << doc;
 		emit this->received(tid, doc);
 	}

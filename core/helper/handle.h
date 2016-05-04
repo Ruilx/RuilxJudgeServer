@@ -20,7 +20,7 @@ protected:
 	void timerEvent(QTimerEvent *e);
 
 signals:
-	void received(int threadId, QJsonDocument doc);
+	void received(quint64 threadId, QJsonDocument doc);
 	void finished(QThread *);
 	void information(QString);
 private slots:
