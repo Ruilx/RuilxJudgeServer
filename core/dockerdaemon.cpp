@@ -29,6 +29,8 @@ DockerDaemon::DockerDaemon(QString dockerPath, QWidget *parent) : QWidget(parent
 	this->outputEdit->setReadOnly(true);
 	this->outputEdit->setWordWrapMode(QTextOption::NoWrap);
 
+	this->dockerSocketPath = "/var/run/docker.sock";
+
 	if(dockerPath.isEmpty()){
 		this->dockerPath = "/usr/bin/docker";
 	}else{
@@ -55,13 +57,23 @@ DockerDaemon::DockerDaemon(QString dockerPath, QWidget *parent) : QWidget(parent
 	this->setLayout(lay);
 	lay->addWidget(this->outputEdit);
 
-	this->outputEdit->insertPlainText("Please use system -> start docker daemon to start docker daemon.\n");
+	if(QFile::exists(this->dockerSocketPath)){
+		this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Docker Daemon", "Docker Daemon has started on another handle, it is already opened."));
+		emit this->dockerStarted();
+	}else{
+		this->outputEdit->insertPlainText("Please use system -> start docker daemon to start docker daemon.\n");
+	}
 }
 
 void DockerDaemon::openDockerDaemon(){
 	this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Docker Daemon", QString("run docker: %1").arg(this->dockerPath)));
 	if(this->dockerProcess->state() == QProcess::NotRunning){
-		this->dockerProcess->start();
+		if(QFile::exists(this->dockerSocketPath)){
+			this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Docker Daemon", "Docker Daemon has started on another handle, it is already opened."));
+			emit this->dockerStarted();
+		}else{
+			this->dockerProcess->start();
+		}
 	}
 }
 
@@ -69,6 +81,10 @@ void DockerDaemon::closeDockerDaemon(){
 	this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Docker Daemon", QString("stop docker daemon")));
 	if(this->dockerProcess->state() != QProcess::NotRunning){
 		this->stopCurrentProgram();
+	}else{
+		if(QFile::exists(this->dockerSocketPath)){
+			this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Docker Daemon", "Docker Daemon has started on another handle, it can't close here."));
+		}
 	}
 }
 

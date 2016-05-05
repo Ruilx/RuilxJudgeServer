@@ -19,11 +19,13 @@ SOURCES += main.cpp\
     utils/logsystem.cpp \
     core/network.cpp \
     core/helper/handle.cpp \
-    core/dockerrest.cpp
+    core/dockerrest.cpp \
+    core/compileoutput.cpp
 
 HEADERS  += mainw.h \
     core/dockerdaemon.h \
     utils/logsystem.h \
     core/network.h \
     core/helper/handle.h \
-    core/dockerrest.h
+    core/dockerrest.h \
+    core/compileoutput.h

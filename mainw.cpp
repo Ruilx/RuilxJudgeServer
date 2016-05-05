@@ -20,9 +20,10 @@ void MainW::closeEvent(QCloseEvent *e){
 
 MainW::MainW(QWidget *parent): QMainWindow(parent){
 	this->resize(800, 600);
-	this->systemMenu = new QMenu("System [&S]", this);
-	this->questionMenu = new QMenu("Question [&Q]", this);
-	this->helpMenu = new QMenu("Help [&H]", this);
+	this->systemMenu = new QMenu("System[&S]", this);
+	this->questionMenu = new QMenu("Question[&Q]", this);
+	this->helpMenu = new QMenu("Help[&H]", this);
+	this->dockerCmdMenu = new QMenu("Docker Command", this);
 
 	this->startServerAct = new QAction("Start Server [&S]", this);
 	this->stopServerAct = new QAction("Stop Server [&T]", this);
@@ -32,10 +33,14 @@ MainW::MainW(QWidget *parent): QMainWindow(parent){
 	this->stopDockerRestAct = new QAction("Close Docker REST [&C]", this);
 	this->exitAct = new QAction("Exit [&X]", this);
 
+	this->problemHelloWorldAct = new QAction("Hello, world!", this);
+	this->problemAPlusBAct = new QAction("A+B problem", this);
+
 	this->mainWidget = new QTabWidget;
 	this->dockerDaemon = new DockerDaemon("/usr/bin/docker", this);
 	this->network = new Network(23333, this);
 	this->dockerRest = new DockerRest("/var/run/docker.sock", this);
+	this->complieOutput = new CompileOutput(this);
 
 	this->systemMenu->addAction(this->startServerAct);
 	this->systemMenu->addAction(this->stopServerAct);
@@ -49,12 +54,18 @@ MainW::MainW(QWidget *parent): QMainWindow(parent){
 	this->systemMenu->addAction(this->exitAct);
 	this->menuBar()->addMenu(this->systemMenu);
 
+	this->questionMenu->addAction(this->problemHelloWorldAct);
+	this->questionMenu->addAction(this->problemAPlusBAct);
 	this->menuBar()->addMenu(this->questionMenu);
+
+	this->menuBar()->addMenu(this->dockerCmdMenu);
+
 	this->menuBar()->addMenu(this->helpMenu);
 
 	this->mainWidget->addTab(dockerDaemon, "Docker Daemon");
 	this->mainWidget->addTab(network, "Network");
 	this->mainWidget->addTab(dockerRest, "docker REST log");
+	this->mainWidget->addTab(complieOutput, "Compile");
 
 
 	this->setCentralWidget(this->mainWidget);
@@ -74,6 +85,7 @@ MainW::MainW(QWidget *parent): QMainWindow(parent){
 	connect(this->dockerRest, SIGNAL(socketOpened()), this, SLOT(dockerRestStartStateSlot()));
 	connect(this->dockerRest, SIGNAL(socketClosed()), this, SLOT(dockerRestStopStateSlot()));
 
+	connect(this->problemHelloWorldAct, SIGNAL(triggered(bool)), this, SLOT(problemHelloworldSlot()));
 	//Set State
 	this->dockerDaemonCloseStateSlot();
 	this->serverCloseStateSlot();

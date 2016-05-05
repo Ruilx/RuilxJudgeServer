@@ -18,6 +18,7 @@ class DockerDaemon : public QWidget
 	bool initiativeStopped;
 	QString dockerPath;
 	QStringList dockerArguments;
+	QString dockerSocketPath;
 
 	QTextEdit *outputEdit;
 	QProcess *dockerProcess;
