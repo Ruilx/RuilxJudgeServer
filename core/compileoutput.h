@@ -86,7 +86,7 @@ public slots:
 		QString compilePath = source.dir().path();
 		switch(type){
 			case C:
-				compileCmd = QString("gcc -O2 -o ") + compilePath + QString("/") + QString("code.run") + QString(" -DONLINE_JUDGE -Wall -lm --static --std=c99 -fno-asm") + sourcePath;
+				compileCmd = QString("gcc -O2 -o ") + compilePath + QString("/") + QString("code.run") + QString(" -DONLINE_JUDGE -Wall -lm --static --std=c99 -fno-asm ") + sourcePath;
 				break;
 			case Cpp:
 				//compileCmd = compileCmd.arg(compilePath + QString("/") + QString("code.run")).arg(sourcePath);
@@ -119,48 +119,43 @@ public slots:
 		}else if(result.isEmpty() && this->exitCode != 0){
 			this->outputEdit->insertPlainText(Log::getLogString(Log::Warning, "Source", QString("CC returns abnormal, but no output.")));
 			emit this->finished();
-		}else if(!result.isEmpty() && this->exitCode == 0){
-			this->outputEdit->insertPlainText(Log::getLogString(Log::Warning, "Source", QString("CC returns normal, and infomations:")));
-			qDebug() << "Complier:" << result;
-			QList<QByteArray> information = result.split('\n');
-			foreach(auto p, information){
-				this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Complier", QString(p)));
-			}
-			emit this->finished();
-		}else if(!result.isEmpty() && this->exitCode != 0){
+		}else if(!result.isEmpty()/* && this->exitCode == 0*/){
+//			this->outputEdit->insertPlainText(Log::getLogString(Log::Warning, "Source", QString("CC returns normal, and infomations:")));
+//			qDebug() << "Complier:" << result;
+//			QList<QByteArray> information = result.split('\n');
+//			foreach(auto p, information){
+//				this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Complier", QString(p)));
+//			}
+//			emit this->finished();
+//		}else if(!result.isEmpty() && this->exitCode != 0){
 			QString errStr = QString(result);
 			QStringList errorList = errStr.split("\n", QString::SkipEmptyParts);
 			QString tempStr;
+			QStringList tempStrList;
 			short errorCount = 0;
 			short warningCount = 0;
-			switch(this->type){
-				case LangType::C:
-				case LangType::Cpp:
-					for(int i=0; i<errorList.length(); i++){
-						errStr = errorList.at(i);
-						//errStr.remove(0, (this->filename.length()+1));
-						if((errStr.contains("error", Qt::CaseInsensitive) || errStr.contains("错误", Qt::CaseInsensitive)) && errStr.length() > 10){
-							tempStr.append(errStr);
-							errorCount++;
-						}else if((errStr.contains("warning", Qt::CaseInsensitive) || errStr.contains("警告", Qt::CaseInsensitive)) && errStr.length() > 10){
-							tempStr.append(errStr);
-							this->hasWarning = true;
-							warningCount++;
-						}else{
-							tempStr.append(errStr + "<br>");
-						}
-					}
-					this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Compile", tempStr));
-					this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Compile", QString("Total ") + QString::number(errorCount) +
-								   QString(" Error(s) and ") +
-								   QString::number(warningCount) + QString(" Warning(s).\n")));
-					break;
-				case LangType::Java:
-					this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Compile", errStr));
-					break;
-				case LangType::Unknown:
-					return;
+
+			for(int i=0; i<errorList.length(); i++){
+				errStr = errorList.at(i);
+				//errStr.remove(0, (this->filename.length()+1));
+				if((errStr.contains("error", Qt::CaseInsensitive) || errStr.contains("错误", Qt::CaseInsensitive)) && errStr.length() > 10){
+					tempStr.append(errStr);
+					errorCount++;
+				}else if((errStr.contains("warning", Qt::CaseInsensitive) || errStr.contains("警告", Qt::CaseInsensitive)) && errStr.length() > 10){
+					tempStr.append(errStr);
+					this->hasWarning = true;
+					warningCount++;
+				}else{
+					tempStr.append(errStr);
+				}
 			}
+			tempStrList = tempStr.split('\n');
+			foreach (auto p, tempStrList) {
+				this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Compile", p));
+			}
+			this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Compile", QString("Total ") + QString::number(errorCount) +
+						   QString(" Error(s) and ") +
+						   QString::number(warningCount) + QString(" Warning(s).\n")));
 			emit this->finished();
 		}
 

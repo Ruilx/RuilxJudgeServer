@@ -25,7 +25,7 @@ DockerDaemon::DockerDaemon(QString dockerPath, QWidget *parent) : QWidget(parent
 	this->outputEdit = new QTextEdit(this);
 	this->dockerProcess = new QProcess(this);
 
-	this->outputEdit->setFont(QFont("RuilxFixedSys, courier new, Wenquanyi Zen Hei", 12));
+	this->outputEdit->setFont(QFont("courier new, courier, monospace", 9));
 	this->outputEdit->setReadOnly(true);
 	this->outputEdit->setWordWrapMode(QTextOption::NoWrap);
 

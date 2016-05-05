@@ -7,6 +7,7 @@
 #include "core/network.h"
 #include "core/dockerrest.h"
 #include "core/compileoutput.h"
+#include "core/dockerrun.h"
 
 class MainW : public QMainWindow
 {
@@ -37,6 +38,8 @@ class MainW : public QMainWindow
 	Network *network;
 	DockerRest *dockerRest;
 	CompileOutput *complieOutput;
+	DockerRun *dockerRun;
+	QMap<QWidget*, int> tabObjectList;
 
 	void closeEvent(QCloseEvent *e);
 
@@ -72,6 +75,26 @@ private slots:
 	void dockerRestStopStateSlot(){
 		this->startDockerRestAct->setEnabled(true);
 		this->stopDockerRestAct->setEnabled(false);
+	}
+
+	void activeDockerDaemonTabSlot(){
+		this->mainWidget->tabBar()->setCurrentIndex(this->tabObjectList.value(this->dockerDaemon));
+	}
+
+	void activeServerTabSlot(){
+		this->mainWidget->tabBar()->setCurrentIndex(this->tabObjectList.value(this->network));
+	}
+
+	void activeRestTabSlot(){
+		this->mainWidget->tabBar()->setCurrentIndex(this->tabObjectList.value(this->dockerRest));
+	}
+
+	void activeCompileTabSlot(){
+		this->mainWidget->tabBar()->setCurrentIndex(this->tabObjectList.value(this->complieOutput));
+	}
+
+	void activeDockerRunTabSlot(){
+		this->mainWidget->tabBar()->setCurrentIndex(this->tabObjectList.value(this->dockerRun));
 	}
 
 	void problemHelloworldSlot(){
@@ -112,6 +135,17 @@ private slots:
 
 		//RunCode:
 		qDebug() << "Ready Run Code";
+
+		if(!this->dockerDaemon->isRunning()){
+			qDebug() << "Docker Daemon is not running";
+			return;
+		}
+		if(!this->network->isRunning()){
+			qDebug() << "Network is not running.";
+			return;
+		}
+
+		//execute docker cmd
 
 	}
 };

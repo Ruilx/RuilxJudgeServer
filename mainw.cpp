@@ -41,6 +41,7 @@ MainW::MainW(QWidget *parent): QMainWindow(parent){
 	this->network = new Network(23333, this);
 	this->dockerRest = new DockerRest("/var/run/docker.sock", this);
 	this->complieOutput = new CompileOutput(this);
+	this->dockerRun = new DockerRun(this);
 
 	this->systemMenu->addAction(this->startServerAct);
 	this->systemMenu->addAction(this->stopServerAct);
@@ -62,30 +63,39 @@ MainW::MainW(QWidget *parent): QMainWindow(parent){
 
 	this->menuBar()->addMenu(this->helpMenu);
 
-	this->mainWidget->addTab(dockerDaemon, "Docker Daemon");
-	this->mainWidget->addTab(network, "Network");
-	this->mainWidget->addTab(dockerRest, "docker REST log");
-	this->mainWidget->addTab(complieOutput, "Compile");
-
+	this->tabObjectList.insert(this->dockerDaemon, this->mainWidget->addTab(dockerDaemon, "Docker Daemon"));
+	this->tabObjectList.insert(this->network, this->mainWidget->addTab(network, "Network"));
+	this->tabObjectList.insert(this->dockerRest, this->mainWidget->addTab(dockerRest, "docker REST log"));
+	this->tabObjectList.insert(this->complieOutput, this->mainWidget->addTab(complieOutput, "Compile"));
+	this->tabObjectList.insert(this->dockerRun, this->mainWidget->addTab(dockerRun, "Docker Command"));
 
 	this->setCentralWidget(this->mainWidget);
 
 	connect(this->startDockerDaemonAct, SIGNAL(triggered(bool)), this->dockerDaemon, SLOT(openDockerDaemon()));
+	connect(this->startDockerDaemonAct, SIGNAL(triggered(bool)), this, SLOT(activeDockerDaemonTabSlot()));
 	connect(this->stopDockerDaemonAct, SIGNAL(triggered(bool)), this->dockerDaemon, SLOT(closeDockerDaemon()));
+	connect(this->stopDockerDaemonAct, SIGNAL(triggered(bool)), this, SLOT(activeDockerDaemonTabSlot()));
 	connect(this->dockerDaemon, SIGNAL(dockerStarted()), this, SLOT(dockerDaemonOpenStateSlot()));
 	connect(this->dockerDaemon, SIGNAL(dockerFinished()), this, SLOT(dockerDaemonCloseStateSlot()));
 
 	connect(this->startServerAct, SIGNAL(triggered(bool)), this->network, SLOT(startServer()));
+	connect(this->startServerAct, SIGNAL(triggered(bool)), this, SLOT(activeServerTabSlot()));
 	connect(this->stopServerAct, SIGNAL(triggered(bool)), this->network, SLOT(stopServer()));
+	connect(this->startServerAct, SIGNAL(triggered(bool)), this, SLOT(activeServerTabSlot()));
 	connect(this->network, SIGNAL(serverStarted()), this, SLOT(serverOpenStateSlot()));
 	connect(this->network, SIGNAL(serverStoped()), this, SLOT(serverCloseStateSlot()));
 
 	connect(this->startDockerRestAct, SIGNAL(triggered(bool)), this->dockerRest, SLOT(openSocket()));
+	connect(this->startDockerRestAct, SIGNAL(triggered(bool)), this, SLOT(activeRestTabSlot()));
 	connect(this->stopDockerRestAct, SIGNAL(triggered(bool)), this->dockerRest, SLOT(closeSocket()));
+	connect(this->stopDockerRestAct, SIGNAL(triggered(bool)), this, SLOT(activeRestTabSlot()));
 	connect(this->dockerRest, SIGNAL(socketOpened()), this, SLOT(dockerRestStartStateSlot()));
 	connect(this->dockerRest, SIGNAL(socketClosed()), this, SLOT(dockerRestStopStateSlot()));
 
 	connect(this->problemHelloWorldAct, SIGNAL(triggered(bool)), this, SLOT(problemHelloworldSlot()));
+	connect(this->problemHelloWorldAct, SIGNAL(triggered(bool)), this, SLOT(activeCompileTabSlot()));
+
+	connect(this->dockerRun, SIGNAL(finished()), this, SLOT(activeDockerRunTabSlot()));
 	//Set State
 	this->dockerDaemonCloseStateSlot();
 	this->serverCloseStateSlot();

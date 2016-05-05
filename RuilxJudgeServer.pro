@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     core/network.cpp \
     core/helper/handle.cpp \
     core/dockerrest.cpp \
-    core/compileoutput.cpp
+    core/compileoutput.cpp \
+    core/dockerrun.cpp
 
 HEADERS  += mainw.h \
     core/dockerdaemon.h \
@@ -28,4 +29,5 @@ HEADERS  += mainw.h \
     core/network.h \
     core/helper/handle.h \
     core/dockerrest.h \
-    core/compileoutput.h
+    core/compileoutput.h \
+    core/dockerrun.h
