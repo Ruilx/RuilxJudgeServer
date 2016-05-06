@@ -51,6 +51,9 @@ private slots:
 		qDebug() << "[DEBUG][Network] receive id:" << tid << "doc:" << doc;
 		emit this->received(tid, doc);
 	}
+	void showInformation(QString str){
+		this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "Handle", str));
+	}
 };
 
 #endif // NETWORK_H

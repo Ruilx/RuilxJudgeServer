@@ -64,6 +64,7 @@ void Network::newConnection(){
 	connect(handleThread, SIGNAL(started()), handle, SLOT(start()));
 	connect(handleThread, SIGNAL(finished()), handle, SLOT(deleteLater()));
 	connect(handle, SIGNAL(finished(QThread*)), this, SLOT(join(QThread*)));
+	connect(handle, SIGNAL(information(QString)), this, SLOT(showInformation(QString)));
 
 	handle->moveToThread(handleThread);
 	handleThread->start();
@@ -71,7 +72,7 @@ void Network::newConnection(){
 	client->clientThread = handleThread;
 	this->clientMap.insert((quint64)handleThread->currentThreadId(), client);
 
-	connect(handle, SIGNAL(received(quint64,QJsonDocument)), this, SLOT(receive(quin64,QJsonDocument)));
+	connect(handle, SIGNAL(received(quint64,QJsonDocument)), this, SLOT(receive(quint64,QJsonDocument)));
 }
 
 void Network::join(QThread *thread){

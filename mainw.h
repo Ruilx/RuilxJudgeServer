@@ -146,6 +146,17 @@ private slots:
 		}
 
 		//execute docker cmd
+		qDebug() << "Read exec docker";
+		if(!this->dockerDaemon->isRunning()){
+			qDebug() << "Docker Daemon is not run.";
+			return;
+		}
+		qint64 ContainerName = QDateTime::currentDateTime().toMSecsSinceEpoch();
+		//part C, C++ and Java
+		this->dockerRun->execute(QString("docker create -P --name %1 -t run_common /home/Runcode -r /home/code.run -n 172.17.0.1:23333 -t 1000 -m 65536 -o 40").arg(ContainerName));
+		this->dockerRun->execute(QString("docker cp %1 %2:/home").arg(filename + QString("/code.run").arg(ContainerName)));
+		this->dockerRun->execute(QString("docker start %1").arg(ContainerName));
+
 
 	}
 };
