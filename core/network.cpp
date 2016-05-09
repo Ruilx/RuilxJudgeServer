@@ -26,6 +26,7 @@ Network::~Network(){
 void Network::send(quint64 tid, QJsonDocument doc){
 	Client *client = clientMap.value(tid, new Client);
 	if(client->clientThread != 0){
+		qDebug() << "[Debug][Network] send: send data: " << doc;
 		client->clientHandle->write(doc);
 	}else{
 		qDebug() << "[ERROR][Network] receive signal with no tid.";

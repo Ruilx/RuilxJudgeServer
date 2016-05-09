@@ -42,6 +42,7 @@ MainW::MainW(QWidget *parent): QMainWindow(parent){
 	this->dockerRest = new DockerRest("/var/run/docker.sock", this);
 	this->complieOutput = new CompileOutput(this);
 	this->dockerRun = new DockerRun(this);
+	this->output = new Output(this);
 
 	this->systemMenu->addAction(this->startServerAct);
 	this->systemMenu->addAction(this->stopServerAct);
@@ -68,6 +69,7 @@ MainW::MainW(QWidget *parent): QMainWindow(parent){
 	this->tabObjectList.insert(this->dockerRest, this->mainWidget->addTab(dockerRest, "docker REST log"));
 	this->tabObjectList.insert(this->complieOutput, this->mainWidget->addTab(complieOutput, "Compile"));
 	this->tabObjectList.insert(this->dockerRun, this->mainWidget->addTab(dockerRun, "Docker Command"));
+	this->tabObjectList.insert(this->output, this->mainWidget->addTab(output, "Output"));
 
 	this->setCentralWidget(this->mainWidget);
 
@@ -96,6 +98,8 @@ MainW::MainW(QWidget *parent): QMainWindow(parent){
 	connect(this->problemHelloWorldAct, SIGNAL(triggered(bool)), this, SLOT(activeCompileTabSlot()));
 
 	connect(this->dockerRun, SIGNAL(finished()), this, SLOT(activeDockerRunTabSlot()));
+
+	connect(this->network, SIGNAL(received(quint64,QJsonDocument)), this, SLOT(networkHandle(quint64,QJsonDocument)));
 	//Set State
 	this->dockerDaemonCloseStateSlot();
 	this->serverCloseStateSlot();

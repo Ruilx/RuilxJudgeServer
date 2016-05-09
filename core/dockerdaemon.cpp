@@ -192,6 +192,7 @@ void DockerDaemon::readStandardError(){
 	}
 	QList<QByteArray> list = str.split('\n');
 	foreach(auto p, list){
+		//[INFOR][StdErr]: time="2016-05-08T23:57:07.056477360+08:00" level=info msg="Loading containers: done."
 		this->outputEdit->insertPlainText(Log::getLogString(Log::Info, "StdErr", QString(p)));
 	}
 }
